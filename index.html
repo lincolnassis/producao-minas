@@ -154,21 +154,63 @@ GROUP BY Paradas
 ORDER BY Paradas;</pre></details>
   </section>
 
-  <div class="atualizado">Atualizado em 11/11/2026 18:35:53</div>
+  <div class="atualizado">Atualizado em 11/11/2026 19:04:53</div>
 </div>
 
 <script>
-const DADOS = {"ranking": [{"Unidade": "Mina A", "realizado": 122151, "meta": 120000}, {"Unidade": "Mina B", "realizado": 93065, "meta": 99000}, {"Unidade": "Mina C", "realizado": 103068, "meta": 105600}, {"Unidade": "Mina D", "realizado": 76369, "meta": 85500}], "filtros": {"Todas": {"realizado": 394653, "meta": 410100, "paradas": [{"Paradas": 0, "dias": 123, "media_real": 1050.0, "media_meta": 1056.0}, {"Paradas": 1, "dias": 133, "media_real": 1032.0, "media_meta": 1056.0}, {"Paradas": 2, "dias": 89, "media_real": 1004.0, "media_meta": 1045.0}, {"Paradas": 3, "dias": 28, "media_real": 879.0, "media_meta": 1025.0}, {"Paradas": 4, "dias": 17, "media_real": 836.0, "media_meta": 1065.0}]}, "Mina A": {"realizado": 122151, "meta": 120000, "paradas": [{"Paradas": 0, "dias": 30, "media_real": 1228.0, "media_meta": 1200.0}, {"Paradas": 1, "dias": 39, "media_real": 1242.0, "media_meta": 1200.0}, {"Paradas": 2, "dias": 22, "media_real": 1233.0, "media_meta": 1200.0}, {"Paradas": 3, "dias": 3, "media_real": 1057.0, "media_meta": 1200.0}, {"Paradas": 4, "dias": 6, "media_real": 1098.0, "media_meta": 1200.0}]}, "Mina B": {"realizado": 93065, "meta": 99000, "paradas": [{"Paradas": 0, "dias": 36, "media_real": 995.0, "media_meta": 1000.0}, {"Paradas": 1, "dias": 34, "media_real": 957.0, "media_meta": 1000.0}, {"Paradas": 2, "dias": 15, "media_real": 948.0, "media_meta": 1000.0}, {"Paradas": 3, "dias": 10, "media_real": 760.0, "media_meta": 1000.0}, {"Paradas": 4, "dias": 4, "media_real": 726.0, "media_meta": 1000.0}]}, "Mina C": {"realizado": 103068, "meta": 105600, "paradas": [{"Paradas": 0, "dias": 33, "media_real": 1109.0, "media_meta": 1100.0}, {"Paradas": 1, "dias": 28, "media_real": 1074.0, "media_meta": 1100.0}, {"Paradas": 2, "dias": 24, "media_real": 1050.0, "media_meta": 1100.0}, {"Paradas": 3, "dias": 8, "media_real": 1054.0, "media_meta": 1100.0}, {"Paradas": 4, "dias": 3, "media_real": 928.0, "media_meta": 1100.0}]}, "Mina D": {"realizado": 76369, "meta": 85500, "paradas": [{"Paradas": 0, "dias": 24, "media_real": 830.0, "media_meta": 900.0}, {"Paradas": 1, "dias": 32, "media_real": 820.0, "media_meta": 900.0}, {"Paradas": 2, "dias": 28, "media_real": 816.0, "media_meta": 900.0}, {"Paradas": 3, "dias": 7, "media_real": 773.0, "media_meta": 900.0}, {"Paradas": 4, "dias": 4, "media_real": 485.0, "media_meta": 900.0}]}}};
+// ---------- Dados trancados + login ----------
+// Os números dos gráficos NÃO estão escritos nesta página: chegam trancados (criptografados).
+// Só a senha de uma pessoa cadastrada consegue destrancar.
 
-// ---------- Login de fachada ----------
-// Lista de usuários vinda do banco usuarios.db: [{email, senha_hash}, ...]
-const USUARIOS = [{"email": "demo@exemplo.com", "senha_hash": "50e71b1184ae3348f73aacffd39cf911ef10223c57bf771bc9f53bb652745da9"}, {"email": "gabriela.barbosa@gmail.com", "senha_hash": "46d9f538bceef026b5b755ac2e08a5da73aaba2f737db0f7bc6257c5d614568e"}, {"email": "lincoln.r.assis@gmail.com", "senha_hash": "9e1e395a847eb070f7b0c357ff0a219521b7fb2dfa8585475cbd8077dbe231b7"}];
+// Os dados trancados: { iv: número da tranca, dados: texto embaralhado } (tudo em base64)
+const DADOS_CIFRADOS = {"iv": "fF0RJw9byuC3aSCV", "dados": "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"};
 
-// Cria a impressão digital (SHA-256) de "email:senha", igual à do criar_usuario.py
-async function criarHash(email, senha) {
-  const texto = new TextEncoder().encode(email.trim().toLowerCase() + ":" + senha);
-  const bytes = await crypto.subtle.digest("SHA-256", texto);
+// Uma "caixinha" por pessoa, com a chave mestra trancada dentro: [{id, sal, iv, chave}, ...]
+// Só abre com a senha daquela pessoa.
+const CAIXINHAS = [{"id": "3378929476f49008db889639941d63a3cf9358d46275944077231575c7f95364", "sal": "xhW9y120/nd/vE7Woyu13g==", "iv": "iU7WfDAsTVkhPMbT", "chave": "J2Bm91X2c7pbt/S3dJf3jV0EV2/Pa8ktFz08q2PzqcSROro75XvhUQLRQWCuLc7c"}, {"id": "577470325cb4c043c3d21d49c130e7a0fced6a9b3087b7919508dd8ce6297598", "sal": "5Cmwn2VtrxfB7T/hwDwuOg==", "iv": "jpIAkh1FM4gv8nDB", "chave": "X3X3ND9Qz0TXYztRssjSgT9znu2pMCR0YPdVggZ9/Xil869Na6uXUs+ItbnTxpHv"}];
+
+// Quantas voltas o misturador de senha dá. TEM que ser igual ao do criar_usuario.py
+const VOLTAS_DO_MISTURADOR = 600000;
+
+// Os dados já destrancados. Começa vazio e só é preenchido depois do login correto.
+let DADOS = null;
+
+// Base64 (letras e números) volta a ser bytes
+function base64ParaBytes(texto) {
+  return Uint8Array.from(atob(texto), caractere => caractere.charCodeAt(0));
+}
+
+// Faz a impressão digital (SHA-256) do e-mail, igual à do criar_usuario.py.
+// É com ela que achamos a caixinha da pessoa (o e-mail não está escrito na página).
+async function criarIdDoEmail(email) {
+  const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(email.trim().toLowerCase()));
   return Array.from(new Uint8Array(bytes)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Tenta destrancar tudo com e-mail e senha. Se algo estiver errado, dá erro (o chamador trata).
+async function destrancarDados(email, senha) {
+  // 1) Acha a caixinha desta pessoa
+  const id = await criarIdDoEmail(email);
+  const caixinha = CAIXINHAS.find(item => item.id === id);
+  if (!caixinha) throw new Error("usuário não encontrado");
+
+  // 2) Mistura a senha com o sal (muitas voltas) para fabricar a chave pessoal
+  const senhaComoMaterial = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(senha), "PBKDF2", false, ["deriveKey"]);
+  const chaveDaPessoa = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: base64ParaBytes(caixinha.sal), iterations: VOLTAS_DO_MISTURADOR, hash: "SHA-256" },
+    senhaComoMaterial, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+
+  // 3) Abre a caixinha e tira de dentro a chave mestra. Com senha errada, ISTO falha (dá erro).
+  const chaveMestraEmBytes = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: base64ParaBytes(caixinha.iv) }, chaveDaPessoa, base64ParaBytes(caixinha.chave));
+  const chaveMestra = await crypto.subtle.importKey(
+    "raw", chaveMestraEmBytes, { name: "AES-GCM" }, false, ["decrypt"]);
+
+  // 4) Usa a chave mestra para destrancar os dados e transformá-los de texto em objeto
+  const dadosEmBytes = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: base64ParaBytes(DADOS_CIFRADOS.iv) }, chaveMestra, base64ParaBytes(DADOS_CIFRADOS.dados));
+  return JSON.parse(new TextDecoder().decode(dadosEmBytes));
 }
 
 // Tira o borrão e esconde a tela de login
@@ -177,21 +219,24 @@ function liberarAcesso() {
   document.getElementById("telaLogin").classList.add("oculta");
 }
 
-// Se a pessoa já entrou nesta aba, não pede de novo (lembra só até fechar a aba)
-try { if (sessionStorage.getItem("logado") === "sim") liberarAcesso(); } catch (e) {}
-
 document.getElementById("formLogin").addEventListener("submit", async evento => {
   evento.preventDefault();  // impede a página de recarregar ao enviar o formulário
-  const email = document.getElementById("campoEmail").value.trim().toLowerCase();
-  const hash = await criarHash(email, document.getElementById("campoSenha").value);
-  // Acha um usuário com o mesmo e-mail E a mesma impressão digital
-  const achou = USUARIOS.some(u => u.email === email && u.senha_hash === hash);
-  if (achou) {
-    try { sessionStorage.setItem("logado", "sim"); } catch (e) {}
+  const botao = evento.target.querySelector("button");
+  const mensagemDeErro = document.getElementById("erroLogin");
+  mensagemDeErro.textContent = "";
+  botao.disabled = true;
+  botao.textContent = "Abrindo...";  // a mistura da senha leva uma fração de segundo
+  try {
+    DADOS = await destrancarDados(
+      document.getElementById("campoEmail").value, document.getElementById("campoSenha").value);
+    document.getElementById("campoSenha").value = "";  // não deixa a senha parada no campo
     liberarAcesso();
-  } else {
-    document.getElementById("erroLogin").textContent = "E-mail ou senha incorretos.";
+    atualizarTudo();  // só agora que temos os dados é que desenhamos os gráficos
+  } catch (erro) {
+    mensagemDeErro.textContent = "E-mail ou senha incorretos.";
   }
+  botao.disabled = false;
+  botao.textContent = "Entrar";
 });
 
 const COR = { verde: "#20c08e", amarelo: "#f5a800", vermelho: "#e8553a" };
@@ -395,7 +440,7 @@ document.querySelectorAll(".aba").forEach(aba => aba.addEventListener("click", (
   (aba.dataset.pagina === "geral" ? graficoProducao : graficoParadas).resize();
 }));
 
-atualizarTudo();
+// Os gráficos são desenhados depois do login (função atualizarTudo, chamada acima no formulário)
 </script>
 </body>
 </html>
