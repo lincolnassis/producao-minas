@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Produção por Mina</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --fundo: #07182b;
+    --painel: #0b2038;
+    --card: #15304f;
+    --texto: #ffffff;
+    --texto-suave: #8fa6c1;
+    --verde: #20c08e;
+    --amarelo: #f5a800;
+    --vermelho: #e8553a;
+    --grade: #1d3a5c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fundo); color: var(--texto); font-family: "Segoe UI", Arial, sans-serif; }
+  .pagina { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+
+  /* Segmentador de minas */
+  .segmentador { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 18px; }
+  .seg-card {
+    background: var(--painel); border: 2px solid transparent; border-radius: 12px;
+    padding: 10px 14px; text-align: left; color: inherit; cursor: pointer; font: inherit;
+    box-shadow: 0 4px 10px rgba(0,0,0,.45); transition: transform .15s, border-color .15s;
+  }
+  .seg-card:hover { transform: translateY(-2px); }
+  .seg-card.ativo { border-color: #ffffff; background: var(--card); }
+  .seg-nome { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .seg-barra { height: 6px; border-radius: 3px; background: var(--grade); overflow: hidden; }
+  .seg-barra span { display: block; height: 100%; border-radius: 3px; }
+  .seg-info { font-size: 11px; color: var(--texto-suave); margin-top: 6px; }
+
+  /* Abas (páginas) */
+  .abas { display: flex; gap: 8px; margin-bottom: 14px; }
+  .aba {
+    background: transparent; color: var(--texto-suave); border: 0; border-bottom: 3px solid transparent;
+    padding: 8px 16px; font: inherit; font-weight: 600; cursor: pointer;
+  }
+  .aba.ativa { color: #fff; border-bottom-color: var(--amarelo); }
+
+  .painel { background: var(--painel); border-radius: 16px; padding: 24px; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+  h1 { margin: 0; font-size: 28px; letter-spacing: .5px; text-transform: uppercase; }
+  .subtitulo { color: var(--texto-suave); margin: 4px 0 20px; font-size: 15px; }
+
+  /* Cards de KPI */
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 20px; }
+  .kpi {
+    background: var(--card); border-radius: 12px; padding: 14px 18px 14px 22px; position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,.4);
+  }
+  .kpi::before { content: ""; position: absolute; left: 10px; top: 14px; bottom: 14px; width: 5px; border-radius: 3px; background: var(--cor, #fff); }
+  .kpi-titulo { font-size: 11px; font-weight: 700; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .6px; }
+  .kpi-valor { font-size: 32px; font-weight: 800; margin-top: 2px; }
+
+  /* Legenda */
+  .legenda { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 18px; font-size: 12px; color: var(--texto-suave); margin-bottom: 6px; }
+  .legenda span { display: inline-flex; align-items: center; gap: 6px; }
+  .quadrado { width: 14px; height: 14px; border-radius: 3px; }
+  .losango { width: 12px; height: 12px; background: #fff; transform: rotate(45deg); }
+  .traco { width: 22px; height: 3px; background: #fff; }
+
+  .area-grafico { position: relative; height: 380px; }
+  details { margin-top: 16px; color: var(--texto-suave); font-size: 13px; }
+  summary { cursor: pointer; }
+  pre { background: #05111f; padding: 12px; border-radius: 8px; overflow-x: auto; color: #b8d0ea; font-size: 12.5px; }
+  .atualizado { color: var(--texto-suave); font-size: 12px; margin-top: 14px; text-align: right; }
+  .oculta { display: none; }
+
+  @media (max-width: 760px) {
+    .segmentador { grid-template-columns: repeat(2, 1fr); }
+    .kpis { grid-template-columns: 1fr; }
+    .area-grafico { height: 320px; }
+  }
+</style>
+</head>
+<body>
+<div class="pagina">
+
+  <div class="segmentador" id="segmentador"></div>
+
+  <div class="abas">
+    <button class="aba ativa" data-pagina="geral">Visão geral</button>
+    <button class="aba" data-pagina="paradas">Paradas x produção</button>
+  </div>
+
+  <!-- Página 1 -->
+  <section class="painel" id="pagina-geral">
+    <h1>Produção por mina</h1>
+    <div class="subtitulo" id="sub-geral"></div>
+    <div class="kpis" id="kpis-geral"></div>
+    <div class="legenda" id="legenda"></div>
+    <div class="area-grafico"><canvas id="graficoProducao"></canvas></div>
+    <details><summary>Ver SQL deste gráfico</summary><pre>SELECT Unidade, SUM(realizado) AS realizado, SUM(meta) AS meta
+FROM producao
+GROUP BY Unidade
+ORDER BY Unidade;</pre></details>
+  </section>
+
+  <!-- Página 2 -->
+  <section class="painel oculta" id="pagina-paradas">
+    <h1>Paradas x produção</h1>
+    <div class="subtitulo" id="sub-paradas"></div>
+    <div class="kpis" id="kpis-paradas"></div>
+    <div class="legenda" id="legenda2"></div>
+    <div class="area-grafico"><canvas id="graficoParadas"></canvas></div>
+    <details><summary>Ver SQL deste gráfico</summary><pre>SELECT Paradas,
+       COUNT(*) AS dias,
+       ROUND(AVG(realizado)) AS media_real,
+       ROUND(AVG(meta)) AS media_meta
+FROM producao
+-- WHERE Unidade = 'Mina A'  (só entra se uma mina for escolhida)
+GROUP BY Paradas
+ORDER BY Paradas;</pre></details>
+  </section>
+
+  <div class="atualizado">Atualizado em 11/11/2026 17:05:53</div>
+</div>
+
+<script>
+const DADOS = {"ranking": [{"Unidade": "Mina A", "realizado": 107696, "meta": 104400}, {"Unidade": "Mina B", "realizado": 81408, "meta": 86000}, {"Unidade": "Mina C", "realizado": 90779, "meta": 92400}, {"Unidade": "Mina D", "realizado": 66109, "meta": 74700}], "filtros": {"Todas": {"realizado": 345992, "meta": 357500, "paradas": [{"Paradas": 0, "dias": 113, "media_real": 1045.0, "media_meta": 1057.0}, {"Paradas": 1, "dias": 126, "media_real": 1027.0, "media_meta": 1054.0}, {"Paradas": 2, "dias": 76, "media_real": 1010.0, "media_meta": 1049.0}, {"Paradas": 3, "dias": 19, "media_real": 869.0, "media_meta": 1011.0}, {"Paradas": 4, "dias": 6, "media_real": 879.0, "media_meta": 1067.0}]}, "Mina A": {"realizado": 107696, "meta": 104400, "paradas": [{"Paradas": 0, "dias": 27, "media_real": 1222.0, "media_meta": 1200.0}, {"Paradas": 1, "dias": 36, "media_real": 1246.0, "media_meta": 1200.0}, {"Paradas": 2, "dias": 21, "media_real": 1240.0, "media_meta": 1200.0}, {"Paradas": 3, "dias": 1, "media_real": 1054.0, "media_meta": 1200.0}, {"Paradas": 4, "dias": 2, "media_real": 1373.0, "media_meta": 1200.0}]}, "Mina B": {"realizado": 81408, "meta": 86000, "paradas": [{"Paradas": 0, "dias": 32, "media_real": 995.0, "media_meta": 1000.0}, {"Paradas": 1, "dias": 32, "media_real": 949.0, "media_meta": 1000.0}, {"Paradas": 2, "dias": 14, "media_real": 941.0, "media_meta": 1000.0}, {"Paradas": 3, "dias": 8, "media_real": 751.0, "media_meta": 1000.0}]}, "Mina C": {"realizado": 90779, "meta": 92400, "paradas": [{"Paradas": 0, "dias": 32, "media_real": 1104.0, "media_meta": 1100.0}, {"Paradas": 1, "dias": 27, "media_real": 1071.0, "media_meta": 1100.0}, {"Paradas": 2, "dias": 18, "media_real": 1056.0, "media_meta": 1100.0}, {"Paradas": 3, "dias": 5, "media_real": 1113.0, "media_meta": 1100.0}, {"Paradas": 4, "dias": 2, "media_real": 994.0, "media_meta": 1100.0}]}, "Mina D": {"realizado": 66109, "meta": 74700, "paradas": [{"Paradas": 0, "dias": 22, "media_real": 812.0, "media_meta": 900.0}, {"Paradas": 1, "dias": 31, "media_real": 815.0, "media_meta": 900.0}, {"Paradas": 2, "dias": 23, "media_real": 807.0, "media_meta": 900.0}, {"Paradas": 3, "dias": 5, "media_real": 776.0, "media_meta": 900.0}, {"Paradas": 4, "dias": 2, "media_real": 271.0, "media_meta": 900.0}]}}};
+
+const COR = { verde: "#20c08e", amarelo: "#f5a800", vermelho: "#e8553a" };
+const nf = new Intl.NumberFormat("pt-BR");
+const nf1 = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const fmtT = v => nf.format(Math.round(v)) + " t";
+
+let filtroAtual = "Todas";
+let graficoProducao = null;
+let graficoParadas = null;
+
+// Cor conforme o atingimento da meta (mesma regra do BI)
+function corPorAtingimento(pct) {
+  if (pct >= 100) return COR.verde;
+  if (pct >= 90) return COR.amarelo;
+  return COR.vermelho;
+}
+const pct = (real, meta) => meta > 0 ? real / meta * 100 : 0;
+
+// Legenda igual à do BI
+const htmlLegenda = `
+  <span><i class="losango"></i> Meta</span>
+  <span><i class="quadrado" style="background:${COR.verde}"></i> 100% ou mais</span>
+  <span><i class="quadrado" style="background:${COR.amarelo}"></i> 90% a 99%</span>
+  <span><i class="quadrado" style="background:${COR.vermelho}"></i> Abaixo de 90%</span>`;
+document.getElementById("legenda").innerHTML = htmlLegenda;
+document.getElementById("legenda2").innerHTML = htmlLegenda;
+
+// Plugin: desenha a linha da meta com losango, o total no topo e o % dentro da barra
+const pluginMeta = {
+  id: "pluginMeta",
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    const metas = chart.data.metas;
+    const reais = chart.data.datasets[0].data;
+    const barras = chart.getDatasetMeta(0).data;
+    ctx.save();
+    barras.forEach((barra, i) => {
+      const yMeta = chart.scales.y.getPixelForValue(metas[i]);
+      const yReal = chart.scales.y.getPixelForValue(reais[i]);
+      const metade = barra.width / 2 + 8;
+
+      // linha da meta
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(barra.x - metade, yMeta); ctx.lineTo(barra.x + metade, yMeta); ctx.stroke();
+
+      // losango no centro
+      ctx.fillStyle = "#fff"; ctx.strokeStyle = "#07182b"; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(barra.x, yMeta - 8); ctx.lineTo(barra.x + 8, yMeta);
+      ctx.lineTo(barra.x, yMeta + 8); ctx.lineTo(barra.x - 8, yMeta); ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // total no topo (acima do que for mais alto: barra ou meta)
+      ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+      ctx.font = "bold 16px Segoe UI, Arial";
+      ctx.fillText(fmtT(reais[i]), barra.x, Math.min(yReal, yMeta) - 12);
+
+      // percentual dentro da barra
+      const altura = chart.scales.y.getPixelForValue(0) - yReal;
+      if (altura > 34) {
+        ctx.textBaseline = "middle"; ctx.font = "bold 18px Segoe UI, Arial";
+        ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = 4;
+        ctx.fillText(nf1.format(pct(reais[i], metas[i])) + "%", barra.x, yReal + altura / 2);
+        ctx.shadowBlur = 0;
+      }
+    });
+    ctx.restore();
+  }
+};
+
+// Barras com degradê horizontal (lado esquerdo mais claro, como no BI)
+function degrade(cor) {
+  return c => {
+    const e = c.element;
+    if (!e || e.x === undefined) return cor;
+    const g = c.chart.ctx.createLinearGradient(e.x - e.width / 2, 0, e.x + e.width / 2, 0);
+    g.addColorStop(0, cor + "bb"); g.addColorStop(0.5, cor + "dd"); g.addColorStop(0.5, cor); g.addColorStop(1, cor);
+    return g;
+  };
+}
+
+function opcoesBase(rotuloTooltip) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    animation: { duration: 700, easing: "easeOutQuart" },
+    layout: { padding: { top: 34 } },
+    plugins: { legend: { display: false }, tooltip: rotuloTooltip },
+    scales: {
+      x: { grid: { display: false }, border: { display: false },
+           ticks: { color: "#fff", font: { size: 15, weight: "bold" } } },
+      y: { beginAtZero: true, border: { display: false }, grid: { color: "#1d3a5c" },
+           ticks: { color: "#8fa6c1", callback: v => nf.format(v) } }
+    }
+  };
+}
+
+// ---------- Segmentador ----------
+function desenharSegmentador() {
+  const ordem = ["Mina A", "Mina B", "Mina C", "Mina D", "Todas"];
+  document.getElementById("segmentador").innerHTML = ordem.map(nome => {
+    const f = DADOS.filtros[nome];
+    const p = pct(f.realizado, f.meta);
+    return `<button class="seg-card ${nome === filtroAtual ? "ativo" : ""}" data-filtro="${nome}">
+      <div class="seg-nome">${nome}</div>
+      <div class="seg-barra"><span style="width:${Math.min(p, 100)}%; background:${corPorAtingimento(p)}"></span></div>
+      <div class="seg-info">${nf1.format(p)}% da meta | ${fmtT(f.realizado)}</div>
+    </button>`;
+  }).join("");
+}
+
+function desenharKpis(idDestino) {
+  const f = DADOS.filtros[filtroAtual];
+  const p = pct(f.realizado, f.meta);
+  document.getElementById(idDestino).innerHTML = `
+    <div class="kpi" style="--cor:${COR.verde}"><div class="kpi-titulo">Realizado total</div><div class="kpi-valor">${fmtT(f.realizado)}</div></div>
+    <div class="kpi" style="--cor:#fff"><div class="kpi-titulo">Meta total</div><div class="kpi-valor">${fmtT(f.meta)}</div></div>
+    <div class="kpi" style="--cor:${corPorAtingimento(p)}"><div class="kpi-titulo">Atingimento da meta</div><div class="kpi-valor">${nf1.format(p)}%</div></div>`;
+}
+
+// ---------- Página 1: realizado x meta por mina (SQL 1) ----------
+function desenharProducao() {
+  const lista = [...DADOS.ranking].sort((a, b) => pct(b.realizado, b.meta) - pct(a.realizado, a.meta));
+  const destaque = u => filtroAtual === "Todas" || filtroAtual === u;
+  // Minas fora do filtro ficam esmaecidas (cor com transparência "40")
+  const corBarra = l => {
+    const cor = corPorAtingimento(pct(l.realizado, l.meta));
+    return destaque(l.Unidade) ? degrade(cor) : cor + "40";
+  };
+  const dados = {
+    labels: lista.map(l => l.Unidade),
+    metas: lista.map(l => l.meta),
+    datasets: [{ data: lista.map(l => l.realizado), backgroundColor: lista.map(corBarra),
+                 borderRadius: 10, maxBarThickness: 110 }]
+  };
+
+  const opcoes = opcoesBase({
+    callbacks: {
+      title: it => it[0].label,
+      label: it => {
+        const i = it.dataIndex;
+        return [`Realizado: ${fmtT(lista[i].realizado)}`, `Meta: ${fmtT(lista[i].meta)}`,
+                `Atingimento: ${nf1.format(pct(lista[i].realizado, lista[i].meta))}%`];
+      }
+    }
+  });
+  if (graficoProducao) graficoProducao.destroy();
+  graficoProducao = new Chart(document.getElementById("graficoProducao"),
+    { type: "bar", data: dados, options: opcoes, plugins: [pluginMeta] });
+}
+
+// ---------- Página 2: produção média por número de paradas (SQL 2) ----------
+function desenharParadas() {
+  const lista = DADOS.filtros[filtroAtual].paradas;
+  const dados = {
+    labels: lista.map(l => l.Paradas + (l.Paradas === 1 ? " parada" : " paradas")),
+    metas: lista.map(l => l.media_meta),
+    datasets: [{ data: lista.map(l => l.media_real),
+                 backgroundColor: lista.map(l => degrade(corPorAtingimento(pct(l.media_real, l.media_meta)))),
+                 borderRadius: 10, maxBarThickness: 110 }]
+  };
+  const opcoes = opcoesBase({
+    callbacks: {
+      title: it => it[0].label,
+      label: it => {
+        const l = lista[it.dataIndex];
+        return [`Produção média: ${fmtT(l.media_real)}`, `Meta média: ${fmtT(l.media_meta)}`,
+                `Registros: ${nf.format(l.dias)}`];
+      }
+    }
+  });
+  if (graficoParadas) graficoParadas.destroy();
+  graficoParadas = new Chart(document.getElementById("graficoParadas"),
+    { type: "bar", data: dados, options: opcoes, plugins: [pluginMeta] });
+}
+
+// ---------- Atualização geral ----------
+function atualizarTudo() {
+  const rotulo = filtroAtual === "Todas" ? "Todas as minas" : filtroAtual;
+  document.getElementById("sub-geral").textContent = `${rotulo} | Realizado x meta, em toneladas`;
+  document.getElementById("sub-paradas").textContent = `${rotulo} | Produção média por quantidade de paradas no dia`;
+  desenharSegmentador();
+  desenharKpis("kpis-geral");
+  desenharKpis("kpis-paradas");
+  desenharProducao();
+  desenharParadas();
+}
+
+document.getElementById("segmentador").addEventListener("click", e => {
+  const botao = e.target.closest(".seg-card");
+  if (!botao) return;
+  filtroAtual = botao.dataset.filtro;
+  atualizarTudo();
+});
+
+document.querySelectorAll(".aba").forEach(aba => aba.addEventListener("click", () => {
+  document.querySelectorAll(".aba").forEach(a => a.classList.toggle("ativa", a === aba));
+  document.getElementById("pagina-geral").classList.toggle("oculta", aba.dataset.pagina !== "geral");
+  document.getElementById("pagina-paradas").classList.toggle("oculta", aba.dataset.pagina !== "paradas");
+  // o gráfico escondido precisa se ajustar ao tamanho quando a página aparece
+  (aba.dataset.pagina === "geral" ? graficoProducao : graficoParadas).resize();
+}));
+
+atualizarTudo();
+</script>
+</body>
+</html>
