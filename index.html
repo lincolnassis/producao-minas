@@ -154,7 +154,7 @@ GROUP BY Paradas
 ORDER BY Paradas;</pre></details>
   </section>
 
-  <div class="atualizado">Atualizado em 11/11/2026 18:34:27</div>
+  <div class="atualizado">Atualizado em 11/11/2026 18:35:53</div>
 </div>
 
 <script>
@@ -162,7 +162,7 @@ const DADOS = {"ranking": [{"Unidade": "Mina A", "realizado": 122151, "meta": 12
 
 // ---------- Login de fachada ----------
 // Lista de usuários vinda do banco usuarios.db: [{email, senha_hash}, ...]
-const USUARIOS = [{"email": "demo@exemplo.com", "senha_hash": "50e71b1184ae3348f73aacffd39cf911ef10223c57bf771bc9f53bb652745da9"}];
+const USUARIOS = [{"email": "demo@exemplo.com", "senha_hash": "50e71b1184ae3348f73aacffd39cf911ef10223c57bf771bc9f53bb652745da9"}, {"email": "gabriela.barbosa@gmail.com", "senha_hash": "46d9f538bceef026b5b755ac2e08a5da73aaba2f737db0f7bc6257c5d614568e"}, {"email": "lincoln.r.assis@gmail.com", "senha_hash": "9e1e395a847eb070f7b0c357ff0a219521b7fb2dfa8585475cbd8077dbe231b7"}];
 
 // Cria a impressão digital (SHA-256) de "email:senha", igual à do criar_usuario.py
 async function criarHash(email, senha) {
