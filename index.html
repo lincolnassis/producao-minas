@@ -71,6 +71,30 @@
   .atualizado { color: var(--texto-suave); font-size: 12px; margin-top: 14px; text-align: right; }
   .oculta { display: none; }
 
+  /* Cadeado de fachada: enquanto bloqueada, a página fica borrada e sem clique */
+  .pagina { transition: filter .4s; }
+  .pagina.bloqueada { filter: blur(14px); pointer-events: none; user-select: none; }
+  .tela-login {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(7,24,43,.45); z-index: 10; padding: 16px;
+  }
+  .tela-login.oculta { display: none; }
+  .caixa-login {
+    background: var(--painel); border-radius: 16px; padding: 28px; width: 100%; max-width: 360px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .caixa-login h2 { margin: 0 0 4px; font-size: 22px; }
+  .caixa-login p { margin: 0 0 18px; color: var(--texto-suave); font-size: 13px; }
+  .caixa-login input {
+    width: 100%; padding: 11px 12px; margin-bottom: 12px; border-radius: 8px;
+    border: 1px solid var(--grade); background: #05111f; color: #fff; font: inherit;
+  }
+  .caixa-login button {
+    width: 100%; padding: 11px; border: 0; border-radius: 8px; background: var(--amarelo);
+    color: #07182b; font: inherit; font-weight: 700; cursor: pointer;
+  }
+  .erro-login { color: var(--vermelho); font-size: 13px; min-height: 18px; margin-bottom: 8px; }
+
   @media (max-width: 760px) {
     .segmentador { grid-template-columns: repeat(2, 1fr); }
     .kpis { grid-template-columns: 1fr; }
@@ -79,7 +103,19 @@
 </style>
 </head>
 <body>
-<div class="pagina">
+<!-- Tela de login: aparece por cima da página borrada -->
+<div class="tela-login" id="telaLogin">
+  <form class="caixa-login" id="formLogin">
+    <h2>Acesso restrito</h2>
+    <p>Entre com seu e-mail e senha para ver os gráficos.</p>
+    <input type="email" id="campoEmail" placeholder="E-mail" autocomplete="username" required>
+    <input type="password" id="campoSenha" placeholder="Senha" autocomplete="current-password" required>
+    <div class="erro-login" id="erroLogin"></div>
+    <button type="submit">Entrar</button>
+  </form>
+</div>
+
+<div class="pagina bloqueada" id="paginaPrincipal">
 
   <div class="segmentador" id="segmentador"></div>
 
@@ -118,11 +154,45 @@ GROUP BY Paradas
 ORDER BY Paradas;</pre></details>
   </section>
 
-  <div class="atualizado">Atualizado em 11/11/2026 17:13:53</div>
+  <div class="atualizado">Atualizado em 11/11/2026 18:34:27</div>
 </div>
 
 <script>
 const DADOS = {"ranking": [{"Unidade": "Mina A", "realizado": 122151, "meta": 120000}, {"Unidade": "Mina B", "realizado": 93065, "meta": 99000}, {"Unidade": "Mina C", "realizado": 103068, "meta": 105600}, {"Unidade": "Mina D", "realizado": 76369, "meta": 85500}], "filtros": {"Todas": {"realizado": 394653, "meta": 410100, "paradas": [{"Paradas": 0, "dias": 123, "media_real": 1050.0, "media_meta": 1056.0}, {"Paradas": 1, "dias": 133, "media_real": 1032.0, "media_meta": 1056.0}, {"Paradas": 2, "dias": 89, "media_real": 1004.0, "media_meta": 1045.0}, {"Paradas": 3, "dias": 28, "media_real": 879.0, "media_meta": 1025.0}, {"Paradas": 4, "dias": 17, "media_real": 836.0, "media_meta": 1065.0}]}, "Mina A": {"realizado": 122151, "meta": 120000, "paradas": [{"Paradas": 0, "dias": 30, "media_real": 1228.0, "media_meta": 1200.0}, {"Paradas": 1, "dias": 39, "media_real": 1242.0, "media_meta": 1200.0}, {"Paradas": 2, "dias": 22, "media_real": 1233.0, "media_meta": 1200.0}, {"Paradas": 3, "dias": 3, "media_real": 1057.0, "media_meta": 1200.0}, {"Paradas": 4, "dias": 6, "media_real": 1098.0, "media_meta": 1200.0}]}, "Mina B": {"realizado": 93065, "meta": 99000, "paradas": [{"Paradas": 0, "dias": 36, "media_real": 995.0, "media_meta": 1000.0}, {"Paradas": 1, "dias": 34, "media_real": 957.0, "media_meta": 1000.0}, {"Paradas": 2, "dias": 15, "media_real": 948.0, "media_meta": 1000.0}, {"Paradas": 3, "dias": 10, "media_real": 760.0, "media_meta": 1000.0}, {"Paradas": 4, "dias": 4, "media_real": 726.0, "media_meta": 1000.0}]}, "Mina C": {"realizado": 103068, "meta": 105600, "paradas": [{"Paradas": 0, "dias": 33, "media_real": 1109.0, "media_meta": 1100.0}, {"Paradas": 1, "dias": 28, "media_real": 1074.0, "media_meta": 1100.0}, {"Paradas": 2, "dias": 24, "media_real": 1050.0, "media_meta": 1100.0}, {"Paradas": 3, "dias": 8, "media_real": 1054.0, "media_meta": 1100.0}, {"Paradas": 4, "dias": 3, "media_real": 928.0, "media_meta": 1100.0}]}, "Mina D": {"realizado": 76369, "meta": 85500, "paradas": [{"Paradas": 0, "dias": 24, "media_real": 830.0, "media_meta": 900.0}, {"Paradas": 1, "dias": 32, "media_real": 820.0, "media_meta": 900.0}, {"Paradas": 2, "dias": 28, "media_real": 816.0, "media_meta": 900.0}, {"Paradas": 3, "dias": 7, "media_real": 773.0, "media_meta": 900.0}, {"Paradas": 4, "dias": 4, "media_real": 485.0, "media_meta": 900.0}]}}};
+
+// ---------- Login de fachada ----------
+// Lista de usuários vinda do banco usuarios.db: [{email, senha_hash}, ...]
+const USUARIOS = [{"email": "demo@exemplo.com", "senha_hash": "50e71b1184ae3348f73aacffd39cf911ef10223c57bf771bc9f53bb652745da9"}];
+
+// Cria a impressão digital (SHA-256) de "email:senha", igual à do criar_usuario.py
+async function criarHash(email, senha) {
+  const texto = new TextEncoder().encode(email.trim().toLowerCase() + ":" + senha);
+  const bytes = await crypto.subtle.digest("SHA-256", texto);
+  return Array.from(new Uint8Array(bytes)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Tira o borrão e esconde a tela de login
+function liberarAcesso() {
+  document.getElementById("paginaPrincipal").classList.remove("bloqueada");
+  document.getElementById("telaLogin").classList.add("oculta");
+}
+
+// Se a pessoa já entrou nesta aba, não pede de novo (lembra só até fechar a aba)
+try { if (sessionStorage.getItem("logado") === "sim") liberarAcesso(); } catch (e) {}
+
+document.getElementById("formLogin").addEventListener("submit", async evento => {
+  evento.preventDefault();  // impede a página de recarregar ao enviar o formulário
+  const email = document.getElementById("campoEmail").value.trim().toLowerCase();
+  const hash = await criarHash(email, document.getElementById("campoSenha").value);
+  // Acha um usuário com o mesmo e-mail E a mesma impressão digital
+  const achou = USUARIOS.some(u => u.email === email && u.senha_hash === hash);
+  if (achou) {
+    try { sessionStorage.setItem("logado", "sim"); } catch (e) {}
+    liberarAcesso();
+  } else {
+    document.getElementById("erroLogin").textContent = "E-mail ou senha incorretos.";
+  }
+});
 
 const COR = { verde: "#20c08e", amarelo: "#f5a800", vermelho: "#e8553a" };
 const nf = new Intl.NumberFormat("pt-BR");
