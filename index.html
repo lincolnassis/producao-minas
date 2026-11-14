@@ -57,6 +57,13 @@
   .kpi-titulo { font-size: 11px; font-weight: 700; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .6px; }
   .kpi-valor { font-size: 32px; font-weight: 800; margin-top: 2px; }
 
+  /* Card discreto com a contagem de registros da planilha base */
+  .mini-registros { display: flex; justify-content: flex-end; margin: -8px 0 10px; }
+  .mini-registros span {
+    font-size: 11px; color: var(--texto-suave); background: var(--card);
+    padding: 3px 10px; border-radius: 999px; opacity: .8;
+  }
+
   /* Legenda */
   .legenda { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 18px; font-size: 12px; color: var(--texto-suave); margin-bottom: 6px; }
   .legenda span { display: inline-flex; align-items: center; gap: 6px; }
@@ -113,7 +120,7 @@
     <input type="password" id="campoSenha" placeholder="Senha" autocomplete="current-password" required>
     <div class="erro-login" id="erroLogin"></div>
     <button type="submit">Entrar</button>
-    <div class="atualizado-login">Dados atualizados em 13/11/2026 21:14:53</div>
+    <div class="atualizado-login">Dados atualizados em 13/11/2026 21:31:53</div>
   </form>
 </div>
 
@@ -131,6 +138,7 @@
     <h1>Produção por mina</h1>
     <div class="subtitulo" id="sub-geral"></div>
     <div class="kpis" id="kpis-geral"></div>
+    <div class="mini-registros" id="mini-registros"></div>
     <div class="legenda" id="legenda"></div>
     <div class="area-grafico"><canvas id="graficoProducao"></canvas></div>
     <details><summary>Ver SQL deste gráfico</summary><pre>SELECT Unidade, SUM(realizado) AS realizado, SUM(meta) AS meta
@@ -156,7 +164,7 @@ GROUP BY Paradas
 ORDER BY Paradas;</pre></details>
   </section>
 
-  <div class="atualizado">Atualizado em 13/11/2026 21:14:53</div>
+  <div class="atualizado">Atualizado em 13/11/2026 21:31:53</div>
 </div>
 
 <script>
@@ -165,7 +173,7 @@ ORDER BY Paradas;</pre></details>
 // Só a senha de uma pessoa cadastrada consegue destrancar.
 
 // Os dados trancados: { iv: número da tranca, dados: texto embaralhado } (tudo em base64)
-const DADOS_CIFRADOS = {"iv": "X1a2Vg87NiqSl+fh", "dados": "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"};
+const DADOS_CIFRADOS = {"iv": "q2lDBI26sJXkkgJ4", "dados": "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"};
 
 // Uma "caixinha" por pessoa, com a chave mestra trancada dentro: [{id, sal, iv, chave}, ...]
 // Só abre com a senha daquela pessoa.
@@ -439,6 +447,9 @@ function atualizarTudo() {
   desenharSegmentador();
   desenharKpis("kpis-geral");
   desenharKpis("kpis-paradas");
+  // Total de linhas da planilha base (sempre de "Todas", não muda com o filtro)
+  document.getElementById("mini-registros").innerHTML =
+    `<span>${nf.format(DADOS.filtros.Todas.registros)} registros na base</span>`;
   desenharProducao();
   desenharParadas();
 }
